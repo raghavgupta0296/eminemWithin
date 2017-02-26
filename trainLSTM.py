@@ -44,7 +44,7 @@ skip_window = 1
 validation_set = np.random.choice(50, 3, replace=False)
 neg_samples = 64
 
-# mbeddings = tf.Variable(tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0))
+# embeddings = tf.Variable(tf.random_uniform([vocab_size, embedding_size], -1.0, 1.0))
 embeddings = word2vec2.trainWord2Vec(data2, batch_size, validation_set, vocab_size, embedding_size, neg_samples,
                                      num_skips, skip_window, int2word)
 print(embeddings)
@@ -156,16 +156,32 @@ def generateTest():
         tx = np.reshape(tx, (1, words_to_read, embedding_size))
 
         predictedWord = model.predict(tx)
+
+        predictedWord = np.asarray(predictedWord).astype('float64')
+        # print ("pW : ", predictedWord)
+
         predictedWord = np.reshape(predictedWord, (vocab_size))
         # print predictedWord, predictedWord.shape
 
         # temperate
         temperature = 0.4
         predictedWord = np.log(predictedWord) / temperature
-        predictedWord = np.exp(predictedWord) / np.sum(np.exp(predictedWord))
-        predictedWord = np.argmax(np.random.multinomial(1, predictedWord, 1))
+        pw = np.exp(predictedWord)
+        predictedWord = pw / np.sum(pw)
+
+        print ("pW2 : ",predictedWord)
+
+        pm = np.random.multinomial(1, predictedWord, 1)
+        print("pm : ",pm)
+        pm = np.reshape(pm,(vocab_size))
+
+        predictedWord = np.argmax(pm)
         #
 
+        # to not get UNK as prediction
+        if (predictedWord==0):
+            predictedWord = np.argsort(pm)[-2]
+        #
 
         tx = np.reshape(tx, (words_to_read, embedding_size))
 
