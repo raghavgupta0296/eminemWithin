@@ -169,11 +169,11 @@ def generateTest():
         pw = np.exp(predictedWord)
         predictedWord = pw / np.sum(pw)
 
-        print ("pW2 : ",predictedWord)
+        # print ("pW2 : ",predictedWord)
 
         pm = np.random.multinomial(1, predictedWord, 1)
         print("pm : ",pm)
-        pm = np.reshape(pm,(vocab_size))
+        # pm = np.reshape(pm,(vocab_size))
 
         predictedWord = np.argmax(pm)
         #
