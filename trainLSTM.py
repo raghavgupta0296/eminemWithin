@@ -187,7 +187,7 @@ def generateTest():
         e = np.reshape(e, (1, embedding_size))
         tx = np.append(tx, e, axis=0)
         tx = tx[1:]
-        print(int2word[predictedWord], " ",)
+        print(int2word[predictedWord], " ",end='')
 
 # print (len(data2))  # - 106989 ...106932 106983
 batch_size = int(len(data2)/213)
