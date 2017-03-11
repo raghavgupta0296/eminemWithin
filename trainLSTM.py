@@ -61,10 +61,10 @@ print(" Embeddings Shape : ", embeddings.shape)
 #	print "embeddings : ",sess.run(e)
 
 
-words_to_read = 6
+words_to_read = 3
 
-X = tf.placeholder(tf.float32, shape=(1, words_to_read, embedding_size))
-Y = tf.placeholder(tf.float32, shape=(vocab_size,))
+X = tf.placeholder(tf.float32, shape=(None, words_to_read, embedding_size))
+Y = tf.placeholder(tf.float32, shape=(None,vocab_size))
 
 
 def one_hot(num):
@@ -72,9 +72,7 @@ def one_hot(num):
     a[num] = 1
     return a
 
-
 i = 0
-
 
 def newXY(i):
     # for i in range(0,len(data2)-words_to_read,1):
@@ -114,9 +112,9 @@ sess = tf.Session()
 K.set_session(sess)
 
 model = Sequential()
-model.add(LSTM(256, input_shape=(int(X.get_shape()[1]), int(X.get_shape()[2])), return_sequences=True))
+model.add(LSTM(10, input_shape=(int(X.get_shape()[1]), int(X.get_shape()[2])), return_sequences=True))
 model.add(Dropout(0.2))
-model.add(LSTM(256))
+model.add(LSTM(10))
 model.add(Dropout(0.2))
 model.add(Dense(vocab_size, activation="softmax"))
 # model.compile(loss="categorical_crossentropy",optimizer="adam")
@@ -147,8 +145,8 @@ print("Training...................")
 # model.fit(X,Y,nb_epoch=20,batch_size=128,callbacks=[checkpoint])
 
 def generateTest():
-    words_to_generate = 50
-    tx = ["came", "back", "from", "those", "strange", "streets"]
+    words_to_generate = 30
+    tx = ["came", "back", "from"]#, "those", "strange", "streets"]
     print(tx)
     tx = [word2int[tx_i] for tx_i in tx]
     tx = [embeddings[tx_i] for tx_i in tx]
@@ -172,8 +170,8 @@ def generateTest():
         # print ("pW2 : ",predictedWord)
 
         pm = np.random.multinomial(1, predictedWord, 1)
-        print("pm : ",pm)
-        # pm = np.reshape(pm,(vocab_size))
+        # print("pm : ",pm)
+        pm = np.reshape(pm,(vocab_size))
 
         predictedWord = np.argmax(pm)
         #
@@ -189,17 +187,26 @@ def generateTest():
         e = np.reshape(e, (1, embedding_size))
         tx = np.append(tx, e, axis=0)
         tx = tx[1:]
-        print(int2word[predictedWord], " ")
+        print(int2word[predictedWord], " ",)
 
+# print (len(data2))  # - 106989 ...106932 106983
+batch_size = int(len(data2)/213)
 
 with sess.as_default():
     sess.run(tf.global_variables_initializer())
     for epoch in range(1, 51):
         print("Epoch ", epoch, "/500")
-        for i in range((len(data2) - words_to_read)):
-            x, y = newXY(i)
+        for i in range(0,(len(data2) - words_to_read)-batch_size,batch_size):
+            x = np.array([])
+            y = np.array([])
+            for j in range(i,i+batch_size,1):
+                # print ('error at ?',i,j)
+                x_, y_ = newXY(j)
+                x = np.append(x,x_)
+                y = np.append(y,y_)
             # X = tf.reshape(X,[1,words_to_read,embedding_size])
-            x = np.reshape(x, (1, x.shape[0], x.shape[1]))
+            x = np.reshape(x, (batch_size, words_to_read, embedding_size))
+            y = np.reshape(y, (batch_size, vocab_size))
             train_step.run(feed_dict={X: x, Y: y, K.learning_phase(): 1})
         # if (i%1000==0):
         # test model
