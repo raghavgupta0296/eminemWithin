@@ -1,4 +1,5 @@
 # Rap-Generation
-Rap generation using word2vec and LSTM
+char-by-char generation of rap lyrics using LSTM and CMU pronunciation dictionary.
+Trained on Eminem and Dr. Dre lyrics.
 
 (Ongoing Project)
