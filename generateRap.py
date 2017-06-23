@@ -29,24 +29,23 @@ int2char = dict(zip(char2int.values(), char2int.keys()))
 data = [char2int[i] for i in lyrics]
 
 
-y = "vision clear\nlike a day dream living near\nmeta fear ask her shes my peer"
-lines2 = y.split("\n")
-y = ""
-for l in lines2:
-    try:
-        if l[-1] == " ":
-            l = l[:-1]
-    except:
-        pass
-    y = y+l[::-1]+"\n"
-y = y[:-1]
-print (y)
-pattern = []
-for p in y:
-    pattern.append(char2int[p])
-look_back = len(y)
-print("lookback : ",look_back)
-
+# y = input("Enter lyrics: ")
+# lines2 = y.split("\n")
+# y = ""
+# for l in lines2:
+#     try:
+#         if l[-1] == " ":
+#             l = l[:-1]
+#     except:
+#         pass
+#     y = y+l[::-1]+"\n"
+# y = y[:-1]
+# print (y)
+# pattern = []
+# for p in y:
+#     pattern.append(char2int[p])
+# look_back = len(y)
+# print("lookback : ",look_back)
 
 
 model = Sequential()
@@ -58,7 +57,7 @@ model.add(Dense(len(chars)))
 model.add(BatchNormalization())
 model.add(Activation('softmax'))
 
-filepath = "weights-improvement-37-1.2212-bigger.hdf5"
+filepath = "weights-improvement-31-1.2793-bigger.hdf5"
 model.load_weights(filepath)
 model.compile(loss='categorical_crossentropy', optimizer='rmsprop')
 
@@ -87,11 +86,11 @@ def rhymeWord(word_to_rhyme):
         r = 0
     return r
 
-# start_seed = np.random.randint(0, len(data) - look_back)
-# pattern = data[start_seed:start_seed + look_back]
-# y = [int2char[i] for i in pattern]
-# y = "".join(y) + ""
-# print(y[::-1])
+start_seed = np.random.randint(0, len(data) - look_back)
+pattern = data[start_seed:start_seed + look_back]
+y = [int2char[i] for i in pattern]
+y = "".join(y) + ""
+print(y[::-1])
 for i in range(1000):
     x = np.reshape(pattern, (1, len(pattern), 1))
     x = x / float(len(chars))
@@ -126,6 +125,21 @@ for i in range(1000):
         y = y + " "
         pattern.append(char2int[" "])
         pattern = pattern[len(rhyming_word)+1:]
+
+        if len(rhyming_word)<=3:
+            rhymeSwitch = True
+            word_to_rhyme = sentence[::-1].split(" ")[-2]
+            rhyming_word = rhymeWord(word_to_rhyme)
+            print("Word to rhyme 2: ", word_to_rhyme)
+            print("rhyming word 2: ", rhyming_word)
+            if rhyming_word == 0:
+                continue
+            for rw in rhyming_word[::-1]:
+                pattern.append(char2int[rw])
+                y = y + rw
+            y = y + " "
+            pattern.append(char2int[" "])
+            pattern = pattern[len(rhyming_word) + 1:]
 
 y = y.split("\n")
 for i in y:
